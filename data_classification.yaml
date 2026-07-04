@@ -1,0 +1,57 @@
+version: 1
+owner: Mohammed Imad Uddin
+review_cadence_days: 90
+
+tiers:
+  hot:      { media: nvme_ssd,  iops_floor: 50000, target_usd_per_gb_month: 0.20 }
+  warm:     { media: sata_ssd,  iops_floor: 5000,  target_usd_per_gb_month: 0.08 }
+  cold:     { media: hdd_raid6, iops_floor: 150,   target_usd_per_gb_month: 0.02 }
+  archive:  { media: object_glacier_class, retrieval_hours: 12, target_usd_per_gb_month: 0.004 }
+
+classes:
+  - name: base_model_weights
+    sensitivity: internal
+    tier: hot
+    irreplaceable: false
+    retention: while_in_service
+    lineage_required: true
+
+  - name: fine_tuned_weights
+    sensitivity: internal
+    tier: hot
+    irreplaceable: true
+    retention: indefinite
+    lineage_required: true
+
+  - name: vector_index
+    sensitivity: internal
+    tier: hot
+    irreplaceable: false
+    retention: while_in_service
+
+  - name: rag_corpus
+    sensitivity: restricted
+    tier: warm
+    encryption_at_rest: required
+    retention: while_in_service
+    lineage_required: true
+
+  - name: fine_tuning_dataset
+    sensitivity: restricted
+    tier: warm
+    encryption_at_rest: required
+    retention_days: 365
+    lineage_required: true
+    legal_basis_documented: true
+
+  - name: raw_logs
+    sensitivity: internal
+    tier: cold
+    retention_days: 400
+    worm: true
+
+  - name: scratch_embeddings
+    sensitivity: internal
+    tier: warm
+    irreplaceable: false
+    retention_days: 30

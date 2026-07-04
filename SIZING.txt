@@ -1,0 +1,140 @@
+Project 4 — Size the AI Estate
+Student ID: F00611260
+Name: Mohammed Imad Uddin
+
+
+1. MODEL SIZING
+
+Chosen quantization: INT4
+
+Formula:
+weights_on_disk = params × bytes_per_weight
+
+Using INT4:
+bytes_per_weight = 0.5
+
+13B model:
+13,000,000,000 × 0.5 bytes = 6,500,000,000 bytes ≈ 6.1 GiB
+
+70B model:
+70,000,000,000 × 0.5 bytes = 35,000,000,000 bytes ≈ 32.6 GiB
+
+Practical deployed VRAM note (supporting check):
+13B INT4 with ~25% runtime headroom ≈ 7.6 GiB
+70B INT4 with ~25% runtime headroom ≈ 40.7 GiB
+
+Smallest practical GPU:
+13B INT4: 16 GB GPU
+70B INT4: 48 GB GPU
+
+Is the existing 48 GB card good enough for the school to use?
+Yes. The 48 GB card comfortably fits the 13B model. It can also run the 70B model at INT4, but that option leaves much less runtime headroom.
+
+2. VECTOR DATABASE SIZING
+
+The selected precision of vectors: halfvec
+
+Reason:
+For a deployment of the ministry size, halfvec reduces the storage requirements for vectors by about 50% compared to float32, but retrieves with almost the same quality.
+
+Formula:
+raw_vectors = num_vectors × dimensions × bytes_per_component
+HNSW_overhead ≈ num_vectors × 8 × M bytes, with M = 32
+
+Raw vectors:
+5,000,000 × 1536 × 2 bytes
+= 15,360,000,000 bytes
+≈ 14.31 GiB
+
+HNSW graph overhead:
+5,000,000 × 8 × 32 bytes
+= 1,280,000,000 bytes
+≈ 1.19 GiB
+
+Total vector estate:
+14.31 GiB + 1.19 GiB = 15.50 GiB
+
+3. DATASET ESTIMATES
+
+RAG corpus assumption:
+250,000 documents
+average document size = 120 KB
+
+RAG corpus size:
+250,000 × 120 KB
+= 30,000,000 KB
+≈ 28.6 GiB
+
+Fine-tuning dataset assumption:
+50,000 approved internal Q&A pairs
+average serialized size = 4 KB
+
+Fine-tuning dataset size:
+50,000 × 4 KB
+= 200,000 KB
+≈ 0.19 GiB
+
+Operational logs assumption:
+200 MB per day retained for 365 days
+≈ 71.3 GiB
+
+Scratch / temporary working space:
+50 GiB
+
+4. TOTAL ESTATE SIZE
+
+Recommended 13B plan total:
+model weights 6.1 GiB
++ vector store 15.5 GiB
++ RAG corpus 28.6 GiB
++ fine-tuning data 0.19 GiB
++ raw logs 71.3 GiB
++ scratch 50 GiB
+= 171.6 GiB total
+
+This is what we are buying:
+A logical storage estate of about 172 GiB, plus one 48 GB GPU for local inference.
+
+5. TIERING TABLE
+
+Asset: Model weights
+Tier: hot
+Reason: The reasons are: Live service of Reason, Latency is a concern.
+
+Asset: Vector index
+Tier: hot
+Reason: Reads are latency critical; low latency reads are important;
+
+Asset: RAG corpus
+Tier: warm
+Reason: Don't read frequently, but read on each token – throughput is more important than IOPS.
+
+Asset: Fine-tuning dataset
+Tier: warm
+Reason: There is a major restriction on this important, but non-live, category.
+
+Asset: Raw logs
+Tier: cold
+Reason: Anything that is left out and subject to audit and review is okay to read sequentially.
+
+Asset: Scratch / temp embeddings
+Tier: warm
+Reason: temporary working set; writes faster, but only for the short term.
+
+Note on the ground of the actual output of the real system:
+
+I ran the bash script storage_audit.sh /home/ubuntu/project-04-F00611260 and checked with the output of the command lsblk to see if the active storage had SSD like properties (ROTA=0), and it did so I decided to store live weights, and the vector index on the hot storage.
+
+6. FINAL RECOMMENDATION
+
+Recommended deployment:
+13B model at INT4
+halfvec vector storage
+current 48 GB GPU retained
+
+Reason:
+The 13B option is not only convenient for the existing GPU, but also allows to maintain moderate storage space and does not necessitate any immediate upgrade of the storage device. The 70B option is viable on a 48 GB card on the INT4, but will leave the least headroom, and will be the "riskier" procurement option.
+
+7. AI USAGE LINE
+
+No AI was utilized in performing the sizing math nor for making the storage and retention decisions. This work was then completed manually according to the phase 1 AI-off policy.
