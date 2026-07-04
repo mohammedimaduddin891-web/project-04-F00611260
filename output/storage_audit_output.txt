@@ -1,0 +1,26 @@
+== Filesystems, capacity, and headroom ==
+Filesystem     Type      Size  Used Avail Use% Mounted on
+/dev/sda1      ext4       45G  2.6G   42G   6% /
+efivarfs       efivarfs  256K   17K  235K   7% /sys/firmware/efi/efivars
+/dev/sda16     ext4      881M  165M  655M  21% /boot
+/dev/sda15     vfat      105M  6.2M   99M   6% /boot/efi
+
+== Block devices, RAID, and rotational vs SSD ==
+NAME     SIZE TYPE ROTA FSTYPE   MOUNTPOINT
+loop0   55.5M loop    1 squashfs /snap/core18/2999
+loop1    112M loop    1 squashfs /snap/oracle-cloud-agent/117
+loop2   49.3M loop    1 squashfs /snap/snapd/26865
+loop3   50.1M loop    1 squashfs /snap/snapd/27406
+sda     46.6G disk    1          
+├─sda1  45.6G part    1 ext4     /
+├─sda14    4M part    1          
+├─sda15  106M part    1 vfat     /boot/efi
+└─sda16  913M part    1 ext4     /boot
+
+== Largest consumers under /home/ubuntu/project-04-F00611260 (top 15) ==
+32K	/home/ubuntu/project-04-F00611260
+12K	/home/ubuntu/project-04-F00611260/output
+
+== Files not read in 180+ days (cold-tier candidates, top 20) ==
+
+Audit complete. Numbers, not vibes. Now decide what to keep.

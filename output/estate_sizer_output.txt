@@ -1,0 +1,16 @@
+== Model weights (disk, weights-only) ==
+     7B  fp16=   13.0 GB  int8=    6.5 GB  int4=    3.3 GB
+    13B  fp16=   24.2 GB  int8=   12.1 GB  int4=    6.1 GB
+    70B  fp16=  130.4 GB  int8=   65.2 GB  int4=   32.6 GB
+   405B  fp16=  754.4 GB  int8=  377.2 GB  int4=  188.6 GB
+
+== A 70B at INT4, deployed VRAM with 25% headroom ==
+  40.7 GB  (one 48 GB card is the practical floor)
+
+== Vector DB: 10M vectors x 1536 dims ==
+   float32:    59.60 GB
+   halfvec:    30.99 GB
+      int8:    16.69 GB
+    binary:     4.17 GB
+
+  Lesson: raw vectors dominate. Quantize before you buy disk.
